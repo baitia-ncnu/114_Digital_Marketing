@@ -1,0 +1,785 @@
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Menu, X, Globe, Home, BookOpen, UserPlus, Send, ChevronDown, Check, Info, Facebook, Instagram, Youtube } from 'lucide-react';
+
+// --- I18N Translation Data (CRITICAL: All strings here) ---
+const translations = {
+    'en-US': {
+        'meta.title': 'Next Horizon: Management & IT Innovation',
+        'meta.description': 'National Chi Nan University BAITIA's Master Program.',
+        'header.title': 'Next Horizon: Management & IT Innovation',
+        'header.subtitle': 'National Chi Nan University (NCNU)',
+        'header.dept_link': 'Department of Business Admission and Innovation Technology Innovation and Application (BAITIA)',
+        'header.notice': 'Note: This is a Trial website for a group project of the Digital Marketing course (elective in BAITIA).',
+        'header.notice_dismiss': 'Dismiss',
+        'nav.home': 'Home',
+        'nav.curriculum': 'Curriculum Planning',
+        'nav.admission': 'Admission',
+        'nav.dropdown.title': 'Related Departments',
+        'nav.dropdown.international': 'Dept. of International Studies',
+        'nav.dropdown.banking': 'Dept. of Banking and Finance',
+        'nav.dropdown.economics': 'Dept. of Economics',
+        'nav.dropdown.infomanagement': 'Dept. of Information Management',
+        'nav.dropdown.tourism': 'Dept. of Tourism',
+        'nav.dropdown.compsci': 'Dept. of Computer Science',
+        'hero.mission': Learn from experts in five management disciplines shaping the global business landscape.',
+        'cta.apply': 'Apply Now',
+        'cta.curriculum': 'View Curriculum',
+        'cta.contact': 'Contact Us',
+        'home.panel1.title': 'Program Overview',
+        'home.panel1.content': 'A dynamic Master\'s program designed to equip students with dual expertise in business management theory and practical IT application, preparing them for the digital economy.',
+        'home.panel2.title': 'Key Focus Areas',
+        'home.panel2.content': 'Digital Strategy, Data Analytics, Supply Chain Optimization, and Enterprise Resource Planning. Our curriculum is constantly updated to meet industry demands.',
+        'home.panel3.title': 'Research & Innovation',
+        'home.panel3.content': 'Engage in high-impact research projects leveraging NCNU\'s strong interdisciplinary resources. Collaborate with industry leaders on real-world challenges.',
+        'curriculum.overview.title': 'Program Curriculum Overview',
+        'curriculum.overview.content': 'Our master\'s curriculum emphasizes a balance of theoretical foundations and practical, project-based learning. Click the link below for the official, detailed planning page.',
+        'curriculum.official_link': 'Go to Official Curriculum Planning Page',
+        'curriculum.map.title': 'Visual Curriculum Map (Sample)',
+        'curriculum.map.subtitle': 'Year 1: Foundation & Core | Year 2: Specialization & Thesis',
+        'curriculum.download_pdf': 'Download Program PDF (Placeholder)',
+        'admission.title': 'Admission & Application',
+        'admission.cta_text': 'Start your journey today and become a leader in the intersection of Management and IT.',
+        'admission.checklist.title': 'Application Checklist',
+        'admission.checklist.item1': 'Online Application Form',
+        'admission.checklist.item2': 'Academic Transcripts (Official)',
+        'admission.checklist.item3': 'Statement of Purpose / Research Proposal',
+        'admission.checklist.item4': 'Two Letters of Recommendation',
+        'admission.contact.title': 'Contact Information',
+        'admission.contact.email': 'Program Office Email',
+        'admission.contact.phone': 'Office Phone',
+        'admission.contact.hours': 'Office Hours: Mon-Fri, 9:00 AM - 5:00 PM (GMT+8)',
+        'admission.policies.title': 'Important Policies & Links',
+        'admission.policies.tuition': 'Tuition and Fees Notes (External Link)',
+        'admission.policies.policies': 'University Admission Policies (External Link)',
+        'footer.address': 'NCNU Address: No. 1 University Rd., Puli Township, Nantou County 545, Taiwan (R.O.C.)',
+        'footer.contact': 'BAITIA Program Contact: baitia@ncnu.edu.tw',
+        'footer.copyright': 'Copyright © 2025 National Chi Nan University',
+        'aria.menu_open': 'Open main menu',
+        'aria.menu_close': 'Close main menu',
+        'aria.lang_switch': 'Switch language to',
+        'aria.curriculum_dropdown': 'Curriculum departments dropdown',
+        'aria.home_link': 'Go to BAITIA Department Home Page',
+        'aria.ncnu_link': 'Go to National Chi Nan University official website',
+        'aria.baitia_link': 'Go to BAITIA program department page',
+    },
+    'zh-TW': {
+        'meta.title': '下一個視野：管理與資訊科技創新', // [TBD - LOCALIZE]
+        'meta.description': '國立暨南國際大學 BAITIA 碩士學位學程。結合商業管理與尖端資訊科技，培育未來領袖。', // [TBD - LOCALIZE]
+        'header.title': '下一個視野：管理與資訊科技創新', // [TBD - LOCALIZE]
+        'header.subtitle': '國立暨南國際大學 (NCNU)', // [TBD - LOCALIZE]
+        'header.dept_link': '企業管理與創新科技應用學系 (BAITIA)', // [TBD - LOCALIZE]
+        'header.notice': '註：此為 BAITIA 數位行銷課程（選修）小組專案的試用網站。', // [TBD - LOCALIZE]
+        'header.notice_dismiss': '關閉', // [TBD - LOCALIZE]
+        'nav.home': '首頁', // [TBD - LOCALIZE]
+        'nav.curriculum': '課程規劃', // [TBD - LOCALIZE]
+        'nav.admission': '招生資訊', // [TBD - LOCALIZE]
+        'nav.dropdown.title': '相關學系',
+        'nav.dropdown.international': '國際企業學系', // [TBD - LOCALIZE]
+        'nav.dropdown.banking': '財務金融學系', // [TBD - LOCALIZE]
+        'nav.dropdown.economics': '經濟學系', // [TBD - LOCALIZE]
+        'nav.dropdown.infomanagement': '資訊管理學系', // [TBD - LOCALIZE]
+        'nav.dropdown.tourism': '觀光休閒與餐旅管理學系', // [TBD - LOCALIZE]
+        'nav.dropdown.compsci': '資訊工程學系', // [TBD - LOCALIZE]
+        'hero.mission': '融合先進商業策略與尖端資訊科技創新，開創未來領導力。', // [TBD - LOCALIZE]
+        'cta.apply': '立即申請', // [TBD - LOCALIZE]
+        'cta.curriculum': '查看課程', // [TBD - LOCALIZE]
+        'cta.contact': '聯絡我們', // [TBD - LOCALIZE]
+        'home.panel1.title': '學程概述', // [TBD - LOCALIZE]
+        'home.panel1.content': '一個充滿活力的碩士學程，旨在使學生具備商業管理理論和實用 IT 應用的雙重專業知識，為數位經濟做好準備。', // [TBD - LOCALIZE]
+        'home.panel2.title': '核心重點領域', // [TBD - LOCALIZE]
+        'home.panel2.content': '數位策略、數據分析、供應鏈優化和企業資源規劃。我們的課程持續更新以符合產業需求。', // [TBD - LOCALIZE]
+        'home.panel3.title': '研究與創新', // [TBD - LOCALIZE]
+        'home.panel3.content': '利用暨南大學強大的跨學科資源，參與具高影響力的研究專案。與業界領袖合作應對真實世界的挑戰。', // [TBD - LOCALIZE]
+        'curriculum.overview.title': '學程課程總覽', // [TBD - LOCALIZE]
+        'curriculum.overview.content': '我們的碩士課程強調理論基礎和實務專案式學習的平衡。點擊下方連結可查看官方詳細規劃頁面。', // [TBD - LOCALIZE]
+        'curriculum.official_link': '前往官方課程規劃頁面', // [TBD - LOCALIZE]
+        'curriculum.map.title': '視覺化課程地圖 (範例)', // [TBD - LOCALIZE]
+        'curriculum.map.subtitle': '第一年：基礎與核心 | 第二年：專業化與論文', // [TBD - LOCALIZE]
+        'curriculum.download_pdf': '下載學程 PDF (預留位)', // [TBD - LOCALIZE]
+        'admission.title': '招生與申請', // [TBD - LOCALIZE]
+        'admission.cta_text': '立即開始您的旅程，成為管理與資訊科技交叉領域的領導者。', // [TBD - LOCALIZE]
+        'admission.checklist.title': '申請清單', // [TBD - LOCALIZE]
+        'admission.checklist.item1': '線上申請表', // [TBD - LOCALIZE]
+        'admission.checklist.item2': '官方成績單', // [TBD - LOCALIZE]
+        'admission.checklist.item3': '讀書計畫書/研究計畫', // [TBD - LOCALIZE]
+        'admission.checklist.item4': '兩封推薦信', // [TBD - LOCALIZE]
+        'admission.contact.title': '聯絡資訊', // [TBD - LOCALIZE]
+        'admission.contact.email': '學程辦公室信箱', // [TBD - LOCALIZE]
+        'admission.contact.phone': '辦公室電話', // [TBD - LOCALIZE]
+        'admission.contact.hours': '辦公時間：週一至週五，上午 9:00 - 下午 5:00 (GMT+8)', // [TBD - LOCALIZE]
+        'admission.policies.title': '重要政策與連結', // [TBD - LOCALIZE]
+        'admission.policies.tuition': '學雜費須知 (外部連結)', // [TBD - LOCALIZE]
+        'admission.policies.policies': '學校招生政策 (外部連結)', // [TBD - LOCALIZE]
+        'footer.address': '暨南大學地址：545 臺灣南投縣埔里鎮大學路 1 號', // [TBD - LOCALIZE]
+        'footer.contact': 'BAITIA 學程聯絡方式：baitia@ncnu.edu.tw', // [TBD - LOCALIZE]
+        'footer.copyright': '版權所有 © 2025 國立暨南國際大學', // [TBD - LOCALIZE]
+        'aria.menu_open': '開啟主選單',
+        'aria.menu_close': '關閉主選單',
+        'aria.lang_switch': '切換語言至',
+        'aria.curriculum_dropdown': '課程相關學系下拉選單',
+        'aria.home_link': '前往 BAITIA 學系首頁',
+        'aria.ncnu_link': '前往國立暨南國際大學官方網站',
+        'aria.baitia_link': '前往 BAITIA 學程學系頁面',
+    },
+};
+
+// --- Constant Data (Non-translatable) ---
+const departmentLinks = [
+    { key: 'international', url: 'https://baitia.ncnu.edu.tw/p/403-1084-1146.php?Lang=en' },
+    { key: 'banking', url: 'https://baitia.ncnu.edu.tw/p/403-1084-1148.php?Lang=en' },
+    { key: 'economics', url: 'https://baitia.ncnu.edu.tw/p/403-1084-1145.php?Lang=en' },
+    { key: 'infomanagement', url: 'https://baitia.ncnu.edu.tw/p/403-1084-1147.php?Lang=en' },
+    { key: 'tourism', url: 'https://baitia.ncnu.edu.tw/p/403-1084-1149.php?Lang=en' },
+    { key: 'compsci', url: 'https://baitia.ncnu.edu.tw/p/403-1084-1151.php?Lang=en' },
+];
+
+const SOCIAL_LINKS = [
+    { key: 'facebook', icon: Facebook, url: 'https://www.facebook.com/share/1BoKBKxXHZ/?', aria: 'Facebook page link' },
+    { key: 'instagram', icon: Instagram, url: 'https://www.instagram.com/ncnu_baitia?igsh=d2F6cWpudmU5M3Jp&utm_source=qr', aria: 'Instagram profile link' },
+    { key: 'youtube', icon: Youtube, url: 'https://youtube.com/channel/UCfW7jAUBy-yxZCxlsxe5ERg?si=Jr8gpLUAM5Di6elS', aria: 'YouTube channel link' },
+];
+
+const NAV_ITEMS = [
+    { key: 'home', icon: Home, page: 'home', href: 'https://baitia.ncnu.edu.tw' },
+    { key: 'curriculum', icon: BookOpen, page: 'curriculum' },
+    { key: 'admission', icon: UserPlus, page: 'admission' },
+];
+
+const CURRICULUM_PLANNING_URL = 'https://baitia.ncnu.edu.tw/p/404-1084-24760.php?Lang=en';
+const NCNU_URL = 'https://www.ncnu.edu.tw';
+const BAITIA_DEPT_URL = 'https://baitia.ncnu.edu.tw/p/404-1084-24750.php?Lang=en';
+const LOGO_LINK = 'https://service.ncnu.edu.tw/ncnuweb/units/share/%E5%85%A8%E6%A0%A1%E5%85%B1%E7%94%A8/web_material/material-logo.htm';
+
+// --- Core App Component ---
+const App = () => {
+    const [language, setLanguage] = useState('en-US');
+    const [isNoticeVisible, setIsNoticeVisible] = useState(true);
+    const [activePage, setActivePage] = useState('home');
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+    // Translation function
+    const T = useCallback((key) => {
+        return translations[language][key] || key;
+    }, [language]);
+
+    // Effect for handling Multilingual SEO and Metadata
+    useEffect(() => {
+        document.title = T('meta.title');
+        const metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc) {
+            metaDesc.setAttribute('content', T('meta.description'));
+        }
+        document.documentElement.lang = language === 'en-US' ? 'en' : 'zh';
+    }, [language, T]);
+
+    // Utility function for setting focus on next element for accessibility
+    const handleNavClick = (page) => {
+        setActivePage(page);
+        setIsMobileMenuOpen(false);
+        setIsDropdownOpen(false);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // Component: Language Switcher
+    const LanguageToggle = () => (
+        <div className="flex space-x-2 text-sm font-medium transition duration-300">
+            {['en-US', 'zh-TW'].map(lang => (
+                <button
+                    key={lang}
+                    onClick={() => setLanguage(lang)}
+                    className={`px-3 py-1 rounded-full transition-all duration-300 ring-2 ring-transparent focus:outline-none focus-visible:ring-blue-400
+                        ${language === lang
+                            ? 'bg-blue-600 text-white shadow-lg'
+                            : 'text-blue-800 hover:bg-blue-100 hover:text-blue-700 bg-white'
+                        }`
+                    }
+                    aria-label={`${T('aria.lang_switch')} ${lang === 'en-US' ? 'English' : '繁體中文'}`}
+                >
+                    {lang === 'en-US' ? 'EN' : '繁中'}
+                </button>
+            ))}
+        </div>
+    );
+
+    // Component: Dismissible Trial Notice
+    const NoticeBanner = () => {
+        if (!isNoticeVisible) return null;
+        return (
+            <div
+                role="alert"
+                className="bg-yellow-500 text-white text-center py-2 px-4 text-sm font-medium flex justify-between items-center flex-wrap"
+            >
+                <Info className="h-4 w-4 mr-2 hidden sm:block" />
+                <p className="flex-1 text-xs sm:text-sm">
+                    {T('header.notice')}
+                </p>
+                <button
+                    onClick={() => setIsNoticeVisible(false)}
+                    className="ml-4 p-1 rounded-full hover:bg-yellow-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white transition"
+                    aria-label={T('header.notice_dismiss')}
+                >
+                    <X className="h-4 w-4" />
+                </button>
+            </div>
+        );
+    };
+
+    // Component: Curriculum Dropdown Menu
+    const CurriculumDropdown = () => (
+        <div className="relative">
+            <button
+                type="button"
+                className="flex items-center space-x-1 py-2 px-3 text-blue-700 hover:text-blue-900 font-medium rounded-lg transition duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                aria-expanded={isDropdownOpen}
+                aria-controls="curriculum-menu"
+                onClick={() => setIsDropdownOpen(prev => !prev)}
+            >
+                <span>{T('nav.curriculum')}</span>
+                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {isDropdownOpen && (
+                <div
+                    id="curriculum-menu"
+                    className="absolute z-30 right-0 lg:left-0 mt-2 w-64 rounded-xl shadow-xl bg-white ring-1 ring-black ring-opacity-5 origin-top-right transform transition-all duration-300 scale-100 opacity-100"
+                    role="menu"
+                    aria-orientation="vertical"
+                    aria-label={T('aria.curriculum_dropdown')}
+                >
+                    <div className="p-2 border-b">
+                        <h4 className="text-xs font-semibold uppercase text-gray-500 p-2">{T('nav.dropdown.title')}</h4>
+                    </div>
+                    {departmentLinks.map((link) => (
+                        <a
+                            key={link.key}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-150 rounded-lg"
+                            role="menuitem"
+                        >
+                            {T(`nav.dropdown.${link.key}`)}
+                        </a>
+                    ))}
+                    <a
+                        href={CURRICULUM_PLANNING_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block px-4 py-3 text-sm font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-b-xl transition duration-150 mt-1"
+                        role="menuitem"
+                    >
+                        {T('curriculum.official_link')}
+                    </a>
+                </div>
+            )}
+        </div>
+    );
+
+
+    // Component: Main Header
+    const Header = () => (
+        <header className="sticky top-0 z-50 shadow-md bg-white/95 backdrop-blur-sm">
+            <NoticeBanner />
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
+                {/* Logo and Titles (Left) */}
+                <div className="flex-shrink-0">
+                    <div className="flex items-center space-x-3">
+                        {/* Placeholder Logo with Link */}
+                        <a
+                            href={LOGO_LINK}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={T('aria.home_link')}
+                            className="text-blue-800 hover:text-blue-600 transition p-1 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        >
+                             {/* SVG Placeholder for NCNU Logo */}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-graduation-cap text-blue-800">
+                                <path d="M22 10v6m-2-2v6m-4-2v4M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 7l10 5 10-5"/>
+                            </svg>
+                        </a>
+                        <div>
+                            <h1 className="text-xl md:text-2xl font-extrabold text-blue-900 tracking-tight">
+                                {T('header.title')}
+                            </h1>
+                            <div className="text-xs sm:text-sm font-medium mt-0.5">
+                                <a
+                                    href={NCNU_URL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-gray-600 hover:text-blue-600 transition duration-150 border-b border-dashed border-gray-400"
+                                    aria-label={T('aria.ncnu_link')}
+                                >
+                                    {T('header.subtitle')}
+                                </a>
+                                <span className="mx-1 text-gray-400">|</span>
+                                <a
+                                    href={BAITIA_DEPT_URL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-gray-600 hover:text-blue-600 transition duration-150 border-b border-dashed border-gray-400"
+                                    aria-label={T('aria.baitia_link')}
+                                >
+                                    BAITIA
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Desktop Nav and Language Toggle (Right) */}
+                <div className="hidden lg:flex items-center space-x-6">
+                    <nav aria-label="Main Navigation" className="flex space-x-4">
+                        {NAV_ITEMS.map(item => (
+                            item.page === 'curriculum' ? (
+                                <CurriculumDropdown key={item.key} />
+                            ) : (
+                                <button
+                                    key={item.key}
+                                    onClick={() => handleNavClick(item.page)}
+                                    className={`py-2 px-3 transition duration-150 rounded-lg font-semibold
+                                        ${activePage === item.page
+                                            ? 'bg-blue-100 text-blue-700'
+                                            : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
+                                        } focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2`
+                                    }
+                                >
+                                    {T(`nav.${item.key}`)}
+                                </button>
+                            )
+                        ))}
+                    </nav>
+                    <LanguageToggle />
+                </div>
+
+                {/* Mobile Menu Button (Right) */}
+                <div className="lg:hidden flex items-center space-x-3">
+                    <LanguageToggle />
+                    <button
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        className="p-2 rounded-lg text-blue-800 hover:bg-blue-50 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        aria-label={isMobileMenuOpen ? T('aria.menu_close') : T('aria.menu_open')}
+                        aria-controls="mobile-menu"
+                        aria-expanded={isMobileMenuOpen}
+                    >
+                        {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                    </button>
+                </div>
+            </div>
+
+            {/* Mobile Navigation Menu */}
+            {isMobileMenuOpen && (
+                <div id="mobile-menu" className="lg:hidden p-4 bg-white shadow-inner">
+                    <nav aria-label="Mobile Navigation">
+                        {NAV_ITEMS.map(item => (
+                            item.page === 'curriculum' ? (
+                                <div key={item.key} className="mt-2">
+                                    <h3 className="block w-full py-3 px-4 font-semibold text-blue-700 border-b border-gray-200">{T('nav.curriculum')}</h3>
+                                    <div className="bg-gray-50 rounded-lg my-2 p-2">
+                                        <h4 className="text-xs font-semibold uppercase text-gray-500 p-2">{T('nav.dropdown.title')}</h4>
+                                        {departmentLinks.map((link) => (
+                                            <a
+                                                key={link.key}
+                                                href={link.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-white rounded-lg transition"
+                                            >
+                                                <BookOpen className="w-4 h-4 mr-3 text-blue-600" />
+                                                {T(`nav.dropdown.${link.key}`)}
+                                            </a>
+                                        ))}
+                                    </div>
+                                    <a
+                                        href={CURRICULUM_PLANNING_URL}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="block text-center font-bold text-blue-700 bg-blue-100 hover:bg-blue-200 py-3 rounded-xl mt-2 transition"
+                                    >
+                                        {T('curriculum.official_link')}
+                                    </a>
+                                </div>
+                            ) : (
+                                <button
+                                    key={item.key}
+                                    onClick={() => handleNavClick(item.page)}
+                                    className={`flex items-center w-full py-3 px-4 text-left text-lg font-bold rounded-xl mt-1 transition duration-150
+                                        ${activePage === item.page
+                                            ? 'bg-blue-600 text-white shadow-md'
+                                            : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
+                                        }`}
+                                >
+                                    <item.icon className="h-5 w-5 mr-4" />
+                                    {T(`nav.${item.key}`)}
+                                </button>
+                            )
+                        ))}
+                    </nav>
+                </div>
+            )}
+        </header>
+    );
+
+    // --- Page Components ---
+
+    const HomeContent = () => (
+        <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-10" id="home">
+            {/* Hero Section */}
+            <section
+                className="relative overflow-hidden bg-gradient-to-br from-blue-900 to-blue-600 text-white rounded-3xl shadow-2xl p-8 md:p-16 lg:p-24 mb-12"
+                style={{
+                    minHeight: '40vh',
+                    backgroundSize: '400% 400%',
+                    animation: 'gradient-animation 15s ease infinite',
+                }}
+            >
+                <style>{`
+                    @keyframes gradient-animation {
+                        0% { background-position: 0% 50%; }
+                        50% { background-position: 100% 50%; }
+                        100% { background-position: 0% 50%; }
+                    }
+                `}</style>
+                <div className="relative z-10 max-w-4xl">
+                    <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold mb-4 drop-shadow-lg" aria-live="polite">
+                        {T('header.title')}
+                    </h2>
+                    <p className="text-xl sm:text-2xl font-light mb-8 opacity-90 drop-shadow">
+                        {T('hero.mission')}
+                    </p>
+                    <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                        <a
+                            href={BAITIA_DEPT_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center px-8 py-3 bg-yellow-400 text-blue-900 font-bold text-lg rounded-full shadow-lg hover:bg-yellow-300 transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus-visible:ring-4 focus-visible:ring-yellow-500 focus-visible:ring-offset-2"
+                        >
+                            <UserPlus className="w-5 h-5 mr-2" />
+                            {T('cta.apply')}
+                        </a>
+                        <button
+                            onClick={() => handleNavClick('curriculum')}
+                            className="flex items-center justify-center px-8 py-3 bg-white text-blue-900 font-bold text-lg rounded-full shadow-lg hover:bg-gray-100 transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus-visible:ring-4 focus-visible:ring-white focus-visible:ring-offset-2"
+                        >
+                            <BookOpen className="w-5 h-5 mr-2" />
+                            {T('cta.curriculum')}
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            {/* Featured Panels */}
+            <section className="grid md:grid-cols-3 gap-8 mb-12" aria-labelledby="featured-areas-title">
+                <h3 id="featured-areas-title" className="sr-only">Featured Program Areas</h3>
+                {[1, 2, 3].map((i) => (
+                    <div
+                        key={i}
+                        className="group bg-white p-8 rounded-xl shadow-lg border border-gray-100 transition duration-300 transform hover:shadow-xl hover:-translate-y-1 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-500"
+                        tabIndex={0}
+                    >
+                        <h4 className="text-2xl font-bold text-blue-800 mb-3 group-hover:text-blue-600 transition">
+                            {T(`home.panel${i}.title`)}
+                        </h4>
+                        <p className="text-gray-600 leading-relaxed">
+                            {T(`home.panel${i}.content`)}
+                        </p>
+                        <a
+                            href={i === 2 ? CURRICULUM_PLANNING_URL : '#'}
+                            className="mt-4 inline-flex items-center text-blue-600 font-semibold group-hover:underline"
+                            target={i === 2 ? "_blank" : "_self"}
+                            rel={i === 2 ? "noopener noreferrer" : ""}
+                        >
+                            {i === 2 ? T('cta.curriculum') : T('cta.contact')}
+                            <span className="ml-1 text-lg">→</span>
+                        </a>
+                    </div>
+                ))}
+            </section>
+        </main>
+    );
+
+    const CurriculumContent = () => (
+        <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-10" id="curriculum">
+            <h2 className="text-4xl font-extrabold text-blue-900 mb-6">{T('nav.curriculum')}</h2>
+
+            {/* Official Link and Overview */}
+            <section className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 mb-10">
+                <h3 className="text-2xl font-bold text-blue-800 mb-4">{T('curriculum.overview.title')}</h3>
+                <p className="text-gray-700 mb-6 max-w-3xl">
+                    {T('curriculum.overview.content')}
+                </p>
+                <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 items-start">
+                    <a
+                        href={CURRICULUM_PLANNING_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-bold rounded-full shadow-md hover:bg-blue-700 transition duration-300 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    >
+                        <BookOpen className="w-5 h-5 mr-2" />
+                        {T('curriculum.official_link')}
+                    </a>
+                    <a
+                        href="#"
+                        role="button"
+                        className="inline-flex items-center px-6 py-3 border border-gray-300 bg-gray-50 text-gray-700 font-bold rounded-full shadow-md hover:bg-gray-100 transition duration-300 focus:outline-none focus-visible:ring-4 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
+                        aria-label={T('curriculum.download_pdf')}
+                    >
+                        <span className="mr-2 text-xl align-middle">⬇</span>
+                        {T('curriculum.download_pdf')}
+                    </a>
+                </div>
+            </section>
+
+            {/* Department Links (Visual Dropdown) - Duplicated logic from Header for standalone display */}
+            <section className="mb-10" aria-labelledby="department-links-title">
+                <h3 id="department-links-title" className="text-2xl font-bold text-blue-800 mb-4">{T('nav.dropdown.title')}</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {departmentLinks.map((link) => (
+                        <a
+                            key={link.key}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center p-4 bg-white rounded-xl shadow-md hover:shadow-lg hover:bg-blue-50 transition duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        >
+                            <BookOpen className="w-5 h-5 mr-3 text-blue-600 flex-shrink-0" />
+                            <span className="font-medium text-gray-800">{T(`nav.dropdown.${link.key}`)}</span>
+                        </a>
+                    ))}
+                </div>
+            </section>
+
+            {/* Visual Curriculum Map Placeholder */}
+            <section className="bg-gray-50 p-8 rounded-2xl shadow-inner" aria-labelledby="map-title">
+                <h3 id="map-title" className="text-2xl font-bold text-blue-800 mb-2">{T('curriculum.map.title')}</h3>
+                <p className="text-gray-600 mb-6">{T('curriculum.map.subtitle')}</p>
+                <div className="relative overflow-x-auto border-4 border-dashed border-gray-300 p-8 rounded-xl min-h-[400px] flex items-center justify-center">
+                    <div className="text-center space-y-4">
+                        <p className="text-xl font-bold text-gray-500">Curriculum Map Visualization Placeholder</p>
+                        <p className="text-gray-500">Interactive Timeline or Draggable Semester Planner goes here.</p>
+                        <div className="flex justify-center space-x-8 mt-6 text-sm font-semibold">
+                            <span className="text-blue-600">Core Modules</span>
+                            <span className="text-yellow-600">IT Electives</span>
+                            <span className="text-red-600">Management Electives</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    );
+
+    const AdmissionContent = () => (
+        <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-10" id="admission">
+            <h2 className="text-4xl font-extrabold text-blue-900 mb-6">{T('nav.admission')}</h2>
+
+            {/* CTA Banner */}
+            <div className="bg-blue-800 text-white p-8 rounded-2xl shadow-xl mb-10 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                <p className="text-xl font-semibold max-w-xl">
+                    {T('admission.cta_text')}
+                </p>
+                <a
+                    href={BAITIA_DEPT_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-8 py-3 bg-yellow-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-yellow-300 transition-all duration-300 focus:outline-none focus-visible:ring-4 focus-visible:ring-yellow-500 focus-visible:ring-offset-2"
+                >
+                    <UserPlus className="w-5 h-5 mr-2" />
+                    {T('cta.apply')}
+                </a>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-10">
+                {/* Application Checklist */}
+                <section className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100" aria-labelledby="checklist-title">
+                    <h3 id="checklist-title" className="text-2xl font-bold text-blue-800 mb-6">{T('admission.checklist.title')}</h3>
+                    <ul className="space-y-4">
+                        {[1, 2, 3, 4].map(i => (
+                            <li key={i} className="flex items-start text-lg text-gray-700 border-b pb-2">
+                                <Check className="w-6 h-6 mr-3 text-green-500 flex-shrink-0 mt-1" />
+                                {T(`admission.checklist.item${i}`)}
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+
+                {/* Contact and Policies */}
+                <div className="space-y-10">
+                    <section className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100" aria-labelledby="contact-title">
+                        <h3 id="contact-title" className="text-2xl font-bold text-blue-800 mb-4">{T('admission.contact.title')}</h3>
+                        <dl className="space-y-3 text-gray-700">
+                            <div className="flex items-center">
+                                <Send className="w-5 h-5 mr-3 text-blue-500" />
+                                <dt className="font-semibold">{T('admission.contact.email')}:</dt>
+                                <dd className="ml-2">baitia@ncnu.edu.tw</dd>
+                            </div>
+                            <div className="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-phone mr-3 text-blue-500"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6.7-6.7A19.79 19.79 0 0 1 2 4.18V2.82A2 2 0 0 1 4.18 2a2 2 0 0 1 2 2.18 19.79 19.79 0 0 1 3.07 8.63 19.5 19.5 0 0 1 6.7 6.7A2 2 0 0 1 19.82 20a2 2 0 0 1 2-2.18"/></svg>
+                                <dt className="font-semibold">{T('admission.contact.phone')}:</dt>
+                                <dd className="ml-2">+886-49-291-0960 ext 4501</dd>
+                            </div>
+                            <div className="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clock mr-3 text-blue-500"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                <dt className="font-semibold">{T('admission.contact.hours')}:</dt>
+                                <dd className="ml-2">{T('admission.contact.hours').split(': ')[1]}</dd>
+                            </div>
+                        </dl>
+
+                        {/* Social Media Links Added */}
+                        <div className="flex space-x-4 mt-6 border-t pt-4">
+                            {SOCIAL_LINKS.map(link => {
+                                const Icon = link.icon;
+                                return (
+                                    <a 
+                                        key={link.key} 
+                                        href={link.url} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        aria-label={link.aria}
+                                        className="text-blue-600 hover:text-blue-800 transition p-2 rounded-full hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                                    >
+                                        <Icon className="w-6 h-6" />
+                                    </a>
+                                );
+                            })}
+                        </div>
+                    </section>
+
+                    <section className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100" aria-labelledby="policies-title">
+                        <h3 id="policies-title" className="text-2xl font-bold text-blue-800 mb-4">{T('admission.policies.title')}</h3>
+                        <ul className="space-y-3">
+                            <li>
+                                <a
+                                    href="#"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline flex items-center"
+                                >
+                                    <Info className="w-5 h-5 mr-2" />
+                                    {T('admission.policies.tuition')}
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    href="#"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline flex items-center"
+                                >
+                                    <Info className="w-5 h-5 mr-2" />
+                                    {T('admission.policies.policies')}
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+                </div>
+            </div>
+        </main>
+    );
+
+    // Component: Footer
+    const Footer = () => (
+        <footer className="bg-blue-900 text-white mt-12">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-8 border-b border-blue-700 pb-8 mb-8">
+                    <div className="md:col-span-2">
+                        <h4 className="text-xl font-bold mb-3">{T('header.title')}</h4>
+                        <p className="text-sm text-blue-200 mb-2">{T('header.dept_link')}</p>
+                        <a href={NCNU_URL} target="_blank" rel="noopener noreferrer" className="text-blue-300 hover:text-white text-sm transition">{T('header.subtitle')}</a>
+                    </div>
+                    <div className="space-y-2">
+                        <h5 className="text-lg font-semibold mb-3">Quick Links</h5>
+                        <ul className="space-y-1 text-sm">
+                            {NAV_ITEMS.map(item => (
+                                <li key={item.key}>
+                                    <button
+                                        onClick={() => handleNavClick(item.page)}
+                                        className="text-blue-300 hover:text-white transition duration-150 text-left"
+                                    >
+                                        {T(`nav.${item.key}`)}
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div className="space-y-3">
+                        <h5 className="text-lg font-semibold mb-3">{T('admission.contact.title')}</h5>
+                        <p className="text-sm text-blue-200">{T('footer.address')}</p>
+                        <p className="text-sm text-blue-200">{T('footer.contact')}</p>
+                        {/* Updated Social Icons with correct links */}
+                        <div className="flex space-x-4 mt-3">
+                            {SOCIAL_LINKS.map(link => {
+                                const Icon = link.icon;
+                                return (
+                                    <a 
+                                        key={link.key} 
+                                        href={link.url} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        aria-label={link.aria} 
+                                        className="text-blue-300 hover:text-white transition"
+                                    >
+                                        <Icon className="w-5 h-5" />
+                                    </a>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row justify-between items-center text-xs text-blue-400">
+                    <p>{T('footer.copyright')}</p>
+                    <div className="mt-4 sm:mt-0">
+                        <LanguageToggle />
+                    </div>
+                </div>
+            </div>
+        </footer>
+    );
+
+    // Main Content Switcher
+    const renderContent = () => {
+        switch (activePage) {
+            case 'home':
+                return <HomeContent />;
+            case 'curriculum':
+                return <CurriculumContent />;
+            case 'admission':
+                return <AdmissionContent />;
+            default:
+                return <HomeContent />;
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+            <style>
+                {`
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+                .font-sans {
+                    font-family: 'Inter', sans-serif;
+                }
+                @keyframes gradient-animation {
+                    0% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                    100% { background-position: 0% 50%; }
+                }
+                `}
+            </style>
+            <Header />
+            <div className="flex-grow">
+                {renderContent()}
+            </div>
+            <Footer />
+        </div>
+    );
+};
+
+// Required wrapper to ensure the Tailwind CSS script is loaded for styling
+const NextHorizonApp = () => (
+    <>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <App />
+    </>
+);
+
+export default NextHorizonApp;
